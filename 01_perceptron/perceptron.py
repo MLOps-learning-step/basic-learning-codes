@@ -82,31 +82,6 @@ class Perceptron(object):
         """
 
         return np.where(self.net_input(X) >= 0.0, 1, -1)
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
         
         

@@ -8,9 +8,13 @@ Created on Thu Jan  1 17:42:53 2026
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import sys, os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '01_perceptron'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '02_adaline'))
+
 from perceptron import Perceptron
-from adaline import AdalineGD
-from adalineSDG import AdalineSGD
+from adaline_gd import AdalineGD
+from adaline_sgd import AdalineSGD
 from matplotlib.colors import ListedColormap
 
 
