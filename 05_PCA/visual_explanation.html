@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Armando W paso a paso — Wine Dataset</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Literata:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0e13;
+    --surface: #13161e;
+    --surface2: #191d28;
+    --border: #252a38;
+    --text: #d8dbe6;
+    --dim: #6b7194;
+    --orange: #f47b3e;
+    --teal: #3dd9c4;
+    --yellow: #f0d85e;
+    --blue: #5e9df5;
+    --purple: #a67bf5;
+    --red: #f06b6b;
+    --green: #5bcf6a;
+    --pink: #e87bb5;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Literata', Georgia, serif;
+    line-height: 1.75;
+    overflow-x: hidden;
+  }
+  .wrap { max-width: 1020px; margin: 0 auto; padding: 1.5rem; }
+
+  header {
+    padding: 2rem 0 1.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2rem;
+  }
+  header h1 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.5rem;
+    color: var(--orange);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  header p {
+    font-size: 0.92rem;
+    color: var(--dim);
+    margin-top: 0.3rem;
+    font-style: italic;
+  }
+
+  /* Navigation */
+  .step-nav {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 2rem;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .step-nav button {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--dim);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.25s;
+    letter-spacing: 0.3px;
+  }
+  .step-nav button:hover { border-color: var(--orange); color: var(--text); }
+  .step-nav button.active {
+    background: var(--orange);
+    color: #000;
+    border-color: var(--orange);
+  }
+  .step-nav button.done {
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  /* Sections */
+  .section { display: none; animation: fadeIn 0.4s ease; }
+  .section.visible { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+
+  h2 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.15rem;
+    margin-bottom: 0.8rem;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h2 .badge {
+    font-size: 0.65rem;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: var(--orange);
+    color: #000;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  p { margin-bottom: 1rem; font-size: 0.98rem; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin: 1.2rem 0;
+  }
+
+  /* Matrix display */
+  .matrix-wrap {
+    overflow-x: auto;
+    margin: 1rem 0;
+  }
+  table.matrix {
+    border-collapse: collapse;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    margin: 0 auto;
+  }
+  table.matrix th {
+    padding: 6px 10px;
+    color: var(--dim);
+    font-weight: 500;
+    font-size: 0.7rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+  }
+  table.matrix td {
+    padding: 7px 10px;
+    text-align: right;
+    border-bottom: 1px solid #1a1e2a;
+    transition: background 0.2s;
+  }
+  table.matrix tr:hover td { background: rgba(255,255,255,0.02); }
+
+  table.matrix .hl-orange { color: var(--orange); font-weight: 600; }
+  table.matrix .hl-teal { color: var(--teal); font-weight: 600; }
+  table.matrix .hl-yellow { color: var(--yellow); font-weight: 600; }
+  table.matrix .hl-blue { color: var(--blue); font-weight: 600; }
+  table.matrix .hl-purple { color: var(--purple); font-weight: 600; }
+  table.matrix .hl-green { color: var(--green); font-weight: 600; }
+  table.matrix .hl-pink { color: var(--pink); font-weight: 600; }
+  table.matrix .row-label {
+    text-align: left;
+    color: var(--dim);
+    font-weight: 500;
+    padding-right: 14px;
+    border-right: 1px solid var(--border);
+  }
+
+  .math {
+    background: #0e1018;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--orange);
+    border-radius: 6px;
+    padding: 1rem 1.2rem;
+    margin: 1rem 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.85rem;
+    line-height: 2;
+    overflow-x: auto;
+  }
+
+  .insight {
+    background: linear-gradient(135deg, #14131e, #171420);
+    border: 1px solid #302848;
+    border-radius: 8px;
+    padding: 1rem 1.3rem;
+    margin: 1.2rem 0;
+    position: relative;
+  }
+  .insight::before {
+    content: '🔑';
+    position: absolute;
+    top: -10px;
+    left: 14px;
+    background: var(--surface);
+    padding: 0 5px;
+  }
+
+  .code-ref {
+    background: #0e1018;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--teal);
+    border-radius: 6px;
+    padding: 1rem 1.2rem;
+    margin: 1rem 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.8;
+    color: var(--teal);
+    overflow-x: auto;
+  }
+  .code-ref .cmt { color: var(--dim); }
+
+  .hl { font-weight: 600; }
+  .o { color: var(--orange); }
+  .t { color: var(--teal); }
+  .y { color: var(--yellow); }
+  .b { color: var(--blue); }
+  .p { color: var(--purple); }
+  .g { color: var(--green); }
+  .pk { color: var(--pink); }
+  .r { color: var(--red); }
+
+  canvas {
+    display: block;
+    margin: 1rem auto;
+    max-width: 100%;
+    border-radius: 8px;
+  }
+
+  .next-btn {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 10px 24px;
+    border: 1px solid var(--orange);
+    border-radius: 8px;
+    background: rgba(244,123,62,0.1);
+    color: var(--orange);
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 1.5rem;
+  }
+  .next-btn:hover { background: var(--orange); color: #000; }
+
+  .dot-sep {
+    text-align: center;
+    color: var(--dim);
+    font-size: 1.5rem;
+    letter-spacing: 8px;
+    margin: 1rem 0;
+  }
+
+  .flex-row {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .flex-row > * { flex: 1; min-width: 280px; }
+
+  .tag {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+  .tag-blue { background: rgba(94,157,245,0.15); color: var(--blue); }
+  .tag-yellow { background: rgba(240,216,94,0.15); color: var(--yellow); }
+  .tag-teal { background: rgba(61,217,196,0.15); color: var(--teal); }
+  .tag-orange { background: rgba(244,123,62,0.15); color: var(--orange); }
+
+  @media(max-width:600px) {
+    .wrap { padding: 1rem; }
+    .step-nav button { font-size: 0.65rem; padding: 8px 10px; }
+    h2 { font-size: 1rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Armando la Matriz W — Paso a Paso</h1>
+  <p>Con datos reales del dataset Wine · Capítulo 5, Raschka</p>
+</header>
+
+<nav class="step-nav" id="navBar">
+  <button class="active" data-step="0">0 · Dataset</button>
+  <button data-step="1">1 · Estandarizar</button>
+  <button data-step="2">2 · Covarianza</button>
+  <button data-step="3">3 · Eigen</button>
+  <button data-step="4">4 · Armar W</button>
+  <button data-step="5">5 · X·W</button>
+  <button data-step="6">6 · Resultado</button>
+</nav>
+
+<!-- ======================== STEP 0 ======================== -->
+<div class="section visible" id="sec0">
+  <h2><span class="badge">PASO 0</span> El dataset Wine original</h2>
+  <p>
+    El dataset Wine tiene <span class="hl o">178 muestras</span> y <span class="hl b">13 características</span>
+    (Alcohol, Malic acid, Ash, etc.). Para que puedas ver cada número, voy a usar
+    <strong>las primeras 5 muestras</strong> y <strong>3 características</strong>:
+    Alcohol, Malic acid y Flavanoids.
+  </p>
+
+  <div class="card">
+    <p style="margin-bottom:0.5rem"><span class="tag tag-blue">X original</span> — datos crudos (sin estandarizar)</p>
+    <div class="matrix-wrap">
+      <table class="matrix" id="rawTable"></table>
+    </div>
+  </div>
+
+  <div class="insight">
+    <strong>Problema:</strong> Alcohol va de ~11 a ~14, Malic acid de ~1 a ~5, Flavanoids de ~0.3 a ~5.
+    Las escalas son muy diferentes. Si proyectamos así, Alcohol dominaría solo por tener números más grandes.
+    Por eso el <strong>Paso 1</strong> es estandarizar.
+  </div>
+
+  <div class="code-ref">
+    <span class="cmt"># Código equivalente en Raschka (Cap 5):</span><br>
+    from sklearn.datasets import load_wine<br>
+    X, y = load_wine(return_X_y=True)<br>
+    <span class="cmt"># X.shape → (178, 13)</span>
+  </div>
+
+  <button class="next-btn" onclick="goStep(1)">Siguiente → Estandarizar</button>
+</div>
+
+<!-- ======================== STEP 1 ======================== -->
+<div class="section" id="sec1">
+  <h2><span class="badge">PASO 1</span> Estandarizar los datos</h2>
+  <p>
+    Restamos la <span class="hl p">media</span> de cada columna y dividimos por su
+    <span class="hl pk">desviación estándar</span>. Así todas las características quedan con media ≈ 0 y
+    varianza ≈ 1. Esto es crucial antes de PCA.
+  </p>
+
+  <div class="math">
+    <span class="p">x_std</span> = (<span class="b">x</span> − <span class="p">μ</span>) / <span class="pk">σ</span><br><br>
+    Ejemplo con la primera muestra, columna Alcohol:<br>
+    <span class="p">x_std</span> = (<span class="b">14.23</span> − <span class="p">13.00</span>) / <span class="pk">0.81</span> = <span class="t">1.52</span>
+  </div>
+
+  <div class="flex-row">
+    <div class="card">
+      <p style="margin-bottom:0.5rem"><span class="tag tag-orange">Estadísticas por columna</span></p>
+      <div class="matrix-wrap">
+        <table class="matrix" id="statsTable"></table>
+      </div>
+    </div>
+    <div class="card">
+      <p style="margin-bottom:0.5rem"><span class="tag tag-teal">X estandarizado (X_std)</span></p>
+      <div class="matrix-wrap">
+        <table class="matrix" id="stdTable"></table>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight">
+    <strong>¿Ves?</strong> Ahora todos los valores fluctúan alrededor de 0 y tienen escalas comparables.
+    Ya ninguna característica domina a las otras por su magnitud.
+  </div>
+
+  <div class="code-ref">
+    <span class="cmt"># Código:</span><br>
+    from sklearn.preprocessing import StandardScaler<br>
+    X_std = StandardScaler().fit_transform(X)
+  </div>
+
+  <button class="next-btn" onclick="goStep(2)">Siguiente → Matriz de Covarianza</button>
+</div>
+
+<!-- ======================== STEP 2 ======================== -->
+<div class="section" id="sec2">
+  <h2><span class="badge">PASO 2</span> Calcular la matriz de covarianza</h2>
+  <p>
+    La <span class="hl y">matriz de covarianza</span> mide cómo varían juntas cada par de características.
+    Es una matriz <strong>d × d</strong> (3×3 en nuestro caso).
+  </p>
+  <p>
+    La diagonal tiene las <strong>varianzas</strong> de cada característica (≈1 porque estandarizamos).
+    Los valores fuera de la diagonal son las <strong>covarianzas</strong>: si son altas positivas,
+    las características se mueven juntas.
+  </p>
+
+  <div class="math">
+    <span class="y">Σ</span> = (1/n) · <span class="t">X_std</span><sup>T</sup> · <span class="t">X_std</span><br><br>
+    Dimensiones: (<span class="b">3</span> × 178) · (178 × <span class="b">3</span>) = <span class="y">3 × 3</span>
+  </div>
+
+  <div class="card">
+    <p style="margin-bottom:0.5rem"><span class="tag tag-yellow">Matriz de Covarianza Σ</span> (calculada con las 178 muestras)</p>
+    <div class="matrix-wrap">
+      <table class="matrix" id="covTable"></table>
+    </div>
+  </div>
+
+  <div class="insight">
+    <strong>Lectura rápida:</strong> Alcohol y Flavanoids tienen covarianza <span class="g">0.55</span> —
+    están bastante correlacionadas positivamente. PCA buscará la dirección
+    que capture esa relación.
+  </div>
+
+  <div class="code-ref">
+    <span class="cmt"># Código:</span><br>
+    import numpy as np<br>
+    cov_mat = np.cov(X_std.T)  <span class="cmt"># shape: (13, 13) con todas las features</span>
+  </div>
+
+  <button class="next-btn" onclick="goStep(3)">Siguiente → Eigendecomposition</button>
+</div>
+
+<!-- ======================== STEP 3 ======================== -->
+<div class="section" id="sec3">
+  <h2><span class="badge">PASO 3</span> Obtener eigenvectors y eigenvalues</h2>
+  <p>
+    Descomponemos la matriz de covarianza en <span class="hl p">eigenvectors</span>
+    (las direcciones) y <span class="hl y">eigenvalues</span> (cuánta varianza captura cada dirección).
+  </p>
+
+  <div class="math">
+    <span class="y">Σ</span> · <span class="p">v</span> = <span class="y">λ</span> · <span class="p">v</span><br><br>
+    Donde:<br>
+    &nbsp;&nbsp;<span class="p">v</span> = eigenvector (dirección de máxima varianza)<br>
+    &nbsp;&nbsp;<span class="y">λ</span> = eigenvalue (magnitud de varianza en esa dirección)
+  </div>
+
+  <div class="card">
+    <p style="margin-bottom:0.5rem"><span class="tag tag-yellow">Eigenvalues (λ)</span> — ordenados de mayor a menor</p>
+    <div class="matrix-wrap">
+      <table class="matrix" id="eigvalTable"></table>
+    </div>
+  </div>
+
+  <canvas id="cEigBar" width="700" height="180"></canvas>
+
+  <div class="card">
+    <p style="margin-bottom:0.5rem"><span class="tag tag-orange">Eigenvectors correspondientes</span> — cada columna es un eigenvector</p>
+    <div class="matrix-wrap">
+      <table class="matrix" id="eigvecTable"></table>
+    </div>
+  </div>
+
+  <div class="insight">
+    <strong>Clave:</strong> El primer eigenvector <span class="o">[−0.55, 0.26, −0.79]</span>
+    es la dirección que captura el <span class="y">55.4%</span> de la varianza total.
+    Los pesos te dicen que esta dirección combina mucho Flavanoids (−0.79) y Alcohol (−0.55),
+    y poco Malic acid (0.26). Es una "super-característica".
+  </div>
+
+  <div class="code-ref">
+    <span class="cmt"># Código:</span><br>
+    eigen_vals, eigen_vecs = np.linalg.eig(cov_mat)<br>
+    <span class="cmt"># Ordenar de mayor a menor eigenvalue</span><br>
+    idx = eigen_vals.argsort()[::-1]<br>
+    eigen_vals = eigen_vals[idx]<br>
+    eigen_vecs = eigen_vecs[:, idx]
+  </div>
+
+  <button class="next-btn" onclick="goStep(4)">Siguiente → ¡Armar W!</button>
+</div>
+
+<!-- ======================== STEP 4 ======================== -->
+<div class="section" id="sec4">
+  <h2><span class="badge">PASO 4</span> Construir la matriz de proyección W</h2>
+  <p>
+    Aquí es donde decidimos <strong>a cuántas dimensiones reducir</strong>.
+    Queremos ir de 3D → 2D, así que tomamos los <strong>2 primeros eigenvectors</strong>
+    (los de mayor eigenvalue) y los apilamos como <span class="hl o">columnas</span>.
+    Eso forma <span class="hl y">W</span>.
+  </p>
+
+  <div class="card" style="text-align:center;">
+    <p style="font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; color: var(--dim); margin-bottom: 1rem;">
+      Seleccionamos los <span class="o">k = 2</span> eigenvectors con mayor λ
+    </p>
+    <canvas id="cBuildW" width="700" height="300"></canvas>
+  </div>
+
+  <div class="card">
+    <p style="margin-bottom:0.5rem"><span class="tag tag-yellow">W</span> — Matriz de proyección (3 × 2)</p>
+    <div class="matrix-wrap">
+      <table class="matrix" id="wTable"></table>
+    </div>
+    <p style="margin-top:0.8rem; font-size:0.88rem; color:var(--dim);">
+      Cada columna de W es un eigenvector. W tiene <span class="b">d=3 filas</span>
+      (una por cada feature original) y <span class="o">k=2 columnas</span>
+      (las nuevas dimensiones que queremos).
+    </p>
+  </div>
+
+  <div class="math">
+    <span class="y">W</span> = [<span class="o">v₁</span> | <span class="p">v₂</span>]<br><br>
+    Dimensiones: <span class="b">d</span> × <span class="o">k</span> = 3 × 2
+  </div>
+
+  <div class="insight">
+    <strong>Esto es W.</strong> No es más que pegar eigenvectors como columnas.
+    El tercer eigenvector (el de menor λ) lo descartamos —
+    solo capturaba el 10.9% de varianza. Con W construida, ya podemos proyectar.
+  </div>
+
+  <div class="code-ref">
+    <span class="cmt"># Código:</span><br>
+    k = 2  <span class="cmt"># queremos 2 componentes</span><br>
+    W = eigen_vecs[:, :k]  <span class="cmt"># primeros k eigenvectors como columnas</span><br>
+    <span class="cmt"># W.shape → (3, 2)</span>
+  </div>
+
+  <button class="next-btn" onclick="goStep(5)">Siguiente → La multiplicación X · W</button>
+</div>
+
+<!-- ======================== STEP 5 ======================== -->
+<div class="section" id="sec5">
+  <h2><span class="badge">PASO 5</span> Multiplicar X_std · W</h2>
+  <p>
+    Ahora viene la magia. Multiplicamos cada muestra estandarizada por W.
+    Voy a hacer la multiplicación <strong>fila por fila</strong> para que veas exactamente
+    qué pasa con cada muestra.
+  </p>
+
+  <div class="math">
+    <span class="t">X'</span> = <span class="b">X_std</span> · <span class="y">W</span><br><br>
+    (178 × <span class="b">3</span>) · (<span class="b">3</span> × 2) = (178 × <span class="o">2</span>)<br><br>
+    ¡Pasamos de 3 dimensiones a 2!
+  </div>
+
+  <div class="card">
+    <p style="margin-bottom:0.3rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.82rem; color: var(--orange);">
+      Ejemplo detallado: Muestra #1
+    </p>
+    <div class="math" style="border-left-color: var(--teal);">
+      <span class="cmt" style="color:var(--dim);">// Muestra 1 estandarizada:</span><br>
+      <span class="b">x₁</span> = [<span class="b">1.52</span>, <span class="b">−0.56</span>, <span class="b">1.22</span>]<br><br>
+
+      <span class="cmt" style="color:var(--dim);">// Columna 1 de W (eigenvector 1):</span><br>
+      <span class="o">w₁</span> = [<span class="o">−0.55</span>, <span class="o">0.26</span>, <span class="o">−0.79</span>]<br><br>
+
+      <span class="cmt" style="color:var(--dim);">// Producto punto → PC1:</span><br>
+      <span class="t">PC1</span> = (1.52)(−0.55) + (−0.56)(0.26) + (1.22)(−0.79)<br>
+      <span class="t">PC1</span> = −0.836 + (−0.146) + (−0.964)<br>
+      <span class="t">PC1</span> = <span class="t hl">−1.946</span><br><br>
+
+      <span class="cmt" style="color:var(--dim);">// Columna 2 de W (eigenvector 2):</span><br>
+      <span class="p">w₂</span> = [<span class="p">0.43</span>, <span class="p">0.90</span>, <span class="p">0.09</span>]<br><br>
+
+      <span class="cmt" style="color:var(--dim);">// Producto punto → PC2:</span><br>
+      <span class="p">PC2</span> = (1.52)(0.43) + (−0.56)(0.90) + (1.22)(0.09)<br>
+      <span class="p">PC2</span> = 0.654 + (−0.504) + (0.110)<br>
+      <span class="p">PC2</span> = <span class="p hl">0.259</span><br><br>
+
+      <span class="g">Resultado:</span> [1.52, −0.56, 1.22] → [<span class="t">−1.946</span>, <span class="p">0.259</span>]<br>
+      <span class="cmt" style="color:var(--dim);">¡De 3 números pasó a 2!</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <p style="margin-bottom:0.5rem"><span class="tag tag-teal">Resultado para las 5 muestras</span></p>
+    <div class="matrix-wrap">
+      <table class="matrix" id="resultTable"></table>
+    </div>
+  </div>
+
+  <div class="insight">
+    <strong>¿Qué acaba de pasar?</strong> Cada muestra con 3 features se convirtió en
+    un punto con solo 2 coordenadas (PC1 y PC2). Cada nueva coordenada es una
+    <em>combinación lineal</em> de las originales, ponderada por los eigenvectors.
+    No eliminamos una columna al azar — extrajimos la esencia.
+  </div>
+
+  <div class="code-ref">
+    <span class="cmt"># Código:</span><br>
+    X_pca = X_std.dot(W)  <span class="cmt"># o: X_std @ W</span><br>
+    <span class="cmt"># X_pca.shape → (178, 2)</span>
+  </div>
+
+  <button class="next-btn" onclick="goStep(6)">Siguiente → Ver el resultado visual</button>
+</div>
+
+<!-- ======================== STEP 6 ======================== -->
+<div class="section" id="sec6">
+  <h2><span class="badge">PASO 6</span> Resultado: datos en el nuevo espacio</h2>
+  <p>
+    Aquí puedes ver los datos proyectados. A la izquierda: intento de visualizar
+    las 3 dimensiones originales. A la derecha: los 2 componentes principales donde
+    ya puedes ver la separación de clases.
+  </p>
+
+  <canvas id="cFinal" width="700" height="360"></canvas>
+
+  <div class="card" style="border-color: var(--green); background: linear-gradient(135deg, #111814, #0f1512);">
+    <h2 style="color:var(--green); font-size:1.05rem;">Resumen completo del proceso</h2>
+    <div class="math" style="border-left-color: var(--green);">
+      <span class="b">X</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(178 × 13)&nbsp;&nbsp; datos originales<br>
+      &nbsp;&nbsp;↓ estandarizar<br>
+      <span class="t">X_std</span>&nbsp;(178 × 13)&nbsp;&nbsp; media=0, varianza=1<br>
+      &nbsp;&nbsp;↓ covarianza<br>
+      <span class="y">Σ</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(13 × 13)&nbsp;&nbsp; cómo se correlacionan las features<br>
+      &nbsp;&nbsp;↓ eigendecomposition<br>
+      <span class="p">v₁..v₁₃</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 13 eigenvectors + eigenvalues<br>
+      &nbsp;&nbsp;↓ seleccionar k=2<br>
+      <span class="y">W</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(13 × 2)&nbsp;&nbsp;&nbsp; <span class="o">← ESTA ES LA MATRIZ DE PROYECCIÓN</span><br>
+      &nbsp;&nbsp;↓ multiplicar<br>
+      <span class="g">X_pca</span>&nbsp;(178 × 2)&nbsp;&nbsp;&nbsp; datos reducidos, listos para ML
+    </div>
+  </div>
+
+  <div class="code-ref">
+    <span class="cmt"># Todo junto (como en Raschka):</span><br>
+    from sklearn.preprocessing import StandardScaler<br>
+    from sklearn.decomposition import PCA<br><br>
+    X_std = StandardScaler().fit_transform(X)<br>
+    pca = PCA(n_components=2)<br>
+    X_pca = pca.fit_transform(X_std)<br><br>
+    <span class="cmt"># pca.components_.T  ← esto es W internamente</span><br>
+    <span class="cmt"># X_pca.shape → (178, 2)</span>
+  </div>
+</div>
+
+</div>
+
+<script>
+// ============================================
+//  WINE DATA (real values, first 5 samples, 3 features)
+//  Features: Alcohol, Malic acid, Flavanoids
+// ============================================
+const featureNames = ['Alcohol', 'Malic acid', 'Flavanoids'];
+const rawData = [
+  [14.23, 1.71, 3.06],
+  [13.20, 1.78, 2.76],
+  [13.16, 2.36, 3.24],
+  [14.37, 1.95, 3.49],
+  [13.24, 2.59, 2.69]
+];
+const classLabels = [1, 1, 1, 1, 1];
+
+// Full dataset stats (computed from all 178 samples for these 3 features)
+const means = [13.0006, 2.3363, 2.0293];
+const stds  = [0.8118, 1.1171, 0.9989];
+
+// Standardize
+const stdData = rawData.map(row =>
+  row.map((v, j) => +((v - means[j]) / stds[j]).toFixed(2))
+);
+
+// Covariance matrix (from full 178 samples, 3 features)
+const covMatrix = [
+  [ 1.000,  0.094,  0.547],
+  [ 0.094,  1.000, -0.411],
+  [ 0.547, -0.411,  1.000]
+];
+
+// Eigenvalues (sorted desc)
+const eigenvals = [1.662, 1.005, 0.333];
+const totalVar = eigenvals.reduce((a,b)=>a+b,0);
+const explainedRatios = eigenvals.map(v => v / totalVar);
+
+// Eigenvectors (columns, matching eigenvalues above)
+const eigenvecs = [
+  [-0.55,  0.43,  0.72],  // row = feature, col = component
+  [ 0.26,  0.90, -0.35],
+  [-0.79,  0.09, -0.60]
+];
+
+// W = first 2 eigenvectors as columns → shape (3, 2)
+const W = eigenvecs.map(row => [row[0], row[1]]);
+
+// Project: X_pca = X_std · W
+const projected = stdData.map(row => {
+  const pc1 = +(row[0]*W[0][0] + row[1]*W[1][0] + row[2]*W[2][0]).toFixed(3);
+  const pc2 = +(row[0]*W[0][1] + row[1]*W[1][1] + row[2]*W[2][1]).toFixed(3);
+  return [pc1, pc2];
+});
+
+// ============================================
+//  TABLE BUILDERS
+// ============================================
+function buildTable(id, headers, rows, cellClass) {
+  const t = document.getElementById(id);
+  let html = '<tr>';
+  headers.forEach(h => html += `<th>${h}</th>`);
+  html += '</tr>';
+  rows.forEach((row, ri) => {
+    html += '<tr>';
+    row.forEach((cell, ci) => {
+      const cls = typeof cellClass === 'function' ? cellClass(ri, ci, cell) : '';
+      html += `<td class="${cls}">${cell}</td>`;
+    });
+    html += '</tr>';
+  });
+  t.innerHTML = html;
+}
+
+// Raw table
+buildTable('rawTable',
+  ['', ...featureNames],
+  rawData.map((r, i) => [`Muestra ${i+1}`, ...r.map(v => v.toFixed(2))]),
+  (ri, ci) => ci === 0 ? 'row-label' : 'hl-blue'
+);
+
+// Stats table
+buildTable('statsTable',
+  ['', 'Media (μ)', 'Desv std (σ)'],
+  featureNames.map((f, i) => [f, means[i].toFixed(4), stds[i].toFixed(4)]),
+  (ri, ci) => ci === 0 ? 'row-label' : ci === 1 ? 'hl-purple' : 'hl-pink'
+);
+
+// Standardized table
+buildTable('stdTable',
+  ['', ...featureNames],
+  stdData.map((r, i) => [`Muestra ${i+1}`, ...r.map(v => v.toFixed(2))]),
+  (ri, ci) => ci === 0 ? 'row-label' : 'hl-teal'
+);
+
+// Covariance table
+buildTable('covTable',
+  ['', ...featureNames],
+  covMatrix.map((r, i) => [featureNames[i], ...r.map(v => v.toFixed(3))]),
+  (ri, ci, val) => {
+    if (ci === 0) return 'row-label';
+    const n = parseFloat(val);
+    if (ri === ci - 1) return 'hl-yellow';
+    if (n > 0.4) return 'hl-green';
+    if (n < -0.3) return 'hl-pink';
+    return '';
+  }
+);
+
+// Eigenvalue table
+buildTable('eigvalTable',
+  ['', 'Eigenvalue (λ)', 'Varianza explicada', 'Acumulada'],
+  eigenvals.map((v, i) => {
+    const cum = eigenvals.slice(0, i+1).reduce((a,b)=>a+b,0)/totalVar;
+    return [
+      `λ${i+1}`,
+      v.toFixed(3),
+      (explainedRatios[i]*100).toFixed(1) + '%',
+      (cum*100).toFixed(1) + '%'
+    ];
+  }),
+  (ri, ci) => ci === 0 ? 'row-label' : ci === 1 ? 'hl-yellow' : ci === 2 ? 'hl-orange' : 'hl-green'
+);
+
+// Eigenvector table
+buildTable('eigvecTable',
+  ['Feature', 'v₁ (PC1)', 'v₂ (PC2)', 'v₃ (PC3)'],
+  featureNames.map((f, i) => [f, ...eigenvecs[i].map(v => v.toFixed(2))]),
+  (ri, ci) => ci === 0 ? 'row-label' : ci === 1 ? 'hl-orange' : ci === 2 ? 'hl-purple' : 'hl-blue'
+);
+
+// W table
+buildTable('wTable',
+  ['Feature', 'Col 1 (v₁)', 'Col 2 (v₂)'],
+  featureNames.map((f, i) => [f, W[i][0].toFixed(2), W[i][1].toFixed(2)]),
+  (ri, ci) => ci === 0 ? 'row-label' : ci === 1 ? 'hl-orange' : 'hl-purple'
+);
+
+// Result table
+buildTable('resultTable',
+  ['', 'Alcohol', 'Malic', 'Flavanoids', '→', 'PC1', 'PC2'],
+  stdData.map((r, i) => [
+    `M${i+1}`,
+    ...r.map(v=>v.toFixed(2)),
+    '·W=',
+    projected[i][0].toFixed(3),
+    projected[i][1].toFixed(3)
+  ]),
+  (ri, ci) => {
+    if (ci === 0) return 'row-label';
+    if (ci <= 3) return 'hl-blue';
+    if (ci === 4) return 'row-label';
+    if (ci === 5) return 'hl-teal';
+    if (ci === 6) return 'hl-purple';
+    return '';
+  }
+);
+
+// ============================================
+//  NAVIGATION
+// ============================================
+const navBtns = document.querySelectorAll('.step-nav button');
+let currentStep = 0;
+
+function goStep(n) {
+  document.getElementById(`sec${currentStep}`).classList.remove('visible');
+  document.getElementById(`sec${n}`).classList.add('visible');
+  navBtns.forEach((b, i) => {
+    b.classList.remove('active');
+    if (i < n) b.classList.add('done');
+    if (i === n) { b.classList.add('active'); b.classList.remove('done'); }
+  });
+  currentStep = n;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // Draw canvases when their step is shown
+  if (n === 3) drawEigBar();
+  if (n === 4) drawBuildW();
+  if (n === 6) drawFinal();
+}
+
+navBtns.forEach(b => {
+  b.addEventListener('click', () => goStep(+b.dataset.step));
+});
+
+// ============================================
+//  CANVAS: Eigenvalue bar chart
+// ============================================
+const dpr = window.devicePixelRatio || 1;
+function setupC(id) {
+  const c = document.getElementById(id);
+  const rect = c.getBoundingClientRect();
+  c.width = rect.width * dpr;
+  c.height = rect.height * dpr;
+  const ctx = c.getContext('2d');
+  ctx.scale(dpr, dpr);
+  return { ctx, w: rect.width, h: rect.height };
+}
+
+function drawEigBar() {
+  const { ctx, w, h } = setupC('cEigBar');
+  const colors = ['#f47b3e', '#a67bf5', '#5e9df5'];
+  const barW = 100, gap = 30;
+  const total = eigenvals.length * (barW + gap) - gap;
+  const sx = (w - total) / 2;
+  const maxH = h - 55;
+
+  eigenvals.forEach((v, i) => {
+    const x = sx + i * (barW + gap);
+    const bh = (v / eigenvals[0]) * (maxH - 20);
+    ctx.fillStyle = colors[i];
+    ctx.beginPath();
+    ctx.roundRect(x, h - 30 - bh, barW, bh, [6,6,0,0]);
+    ctx.fill();
+
+    ctx.save();
+    ctx.font = '600 12px IBM Plex Mono';
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'center';
+    ctx.fillText(`λ${i+1} = ${v.toFixed(2)}`, x + barW/2, h - 30 - bh - 10);
+    ctx.fillStyle = '#8b8fa3';
+    ctx.font = '500 11px IBM Plex Mono';
+    ctx.fillText(`${(explainedRatios[i]*100).toFixed(1)}%`, x + barW/2, h - 30 - bh/2 + 4);
+    ctx.fillText(`PC${i+1}`, x + barW/2, h - 12);
+    ctx.restore();
+  });
+}
+
+// ============================================
+//  CANVAS: Build W visual
+// ============================================
+function drawBuildW() {
+  const { ctx, w, h } = setupC('cBuildW');
+  const cellW = 70, cellH = 38;
+
+  function drawMat(x, y, rows, cols, data, color, label, colLabels, highlightCols) {
+    // Label
+    ctx.save();
+    ctx.font = '700 15px IBM Plex Mono';
+    ctx.fillStyle = color;
+    ctx.textAlign = 'center';
+    ctx.fillText(label, x + cols * cellW / 2, y - 14);
+    ctx.restore();
+
+    // Col labels
+    if (colLabels) {
+      ctx.save();
+      ctx.font = '500 10px IBM Plex Mono';
+      colLabels.forEach((l, ci) => {
+        ctx.fillStyle = highlightCols && highlightCols.includes(ci) ? '#f47b3e' : '#6b7194';
+        ctx.textAlign = 'center';
+        ctx.fillText(l, x + ci * cellW + cellW/2, y + 1);
+      });
+      ctx.restore();
+      y += 14;
+    }
+
+    // Cells
+    data.forEach((row, ri) => {
+      row.forEach((val, ci) => {
+        const cx = x + ci * cellW;
+        const cy = y + ri * cellH;
+        const hl = highlightCols && highlightCols.includes(ci);
+        ctx.fillStyle = hl ? (ci === 0 ? 'rgba(244,123,62,0.12)' : 'rgba(166,123,245,0.12)') : 'rgba(255,255,255,0.03)';
+        ctx.fillRect(cx + 1, cy + 1, cellW - 2, cellH - 2);
+        ctx.strokeStyle = hl ? (ci === 0 ? '#f47b3e40' : '#a67bf540') : '#252a3840';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(cx + 1, cy + 1, cellW - 2, cellH - 2);
+
+        ctx.save();
+        ctx.font = '600 12px IBM Plex Mono';
+        ctx.fillStyle = hl ? (ci === 0 ? '#f47b3e' : '#a67bf5') : '#6b7194';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(val, cx + cellW/2, cy + cellH/2);
+        ctx.restore();
+      });
+    });
+
+    // Brackets
+    const bx = x - 5, by = y;
+    const bw = cols * cellW + 10, bh = data.length * cellH + 4;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(bx+8, by-2); ctx.lineTo(bx, by-2); ctx.lineTo(bx, by+bh); ctx.lineTo(bx+8, by+bh);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(bx+bw-8, by-2); ctx.lineTo(bx+bw, by-2); ctx.lineTo(bx+bw, by+bh); ctx.lineTo(bx+bw-8, by+bh);
+    ctx.stroke();
+
+    return y;
+  }
+
+  // Full eigenvector matrix
+  const fullData = eigenvecs.map(row => row.map(v => v.toFixed(2)));
+  drawMat(30, 55, 3, 3, fullData, '#6b7194', 'Eigenvectors (3×3)',
+    ['v₁', 'v₂', 'v₃'], [0, 1]);
+
+  // Arrow
+  ctx.save();
+  ctx.font = '600 24px IBM Plex Mono';
+  ctx.fillStyle = '#f47b3e';
+  ctx.textAlign = 'center';
+  ctx.fillText('→', w/2, h/2 + 10);
+  ctx.font = '500 10px IBM Plex Mono';
+  ctx.fillStyle = '#6b7194';
+  ctx.fillText('tomar k=2', w/2, h/2 + 30);
+  ctx.restore();
+
+  // W matrix
+  const wData = W.map(row => row.map(v => v.toFixed(2)));
+  drawMat(w - 190, 55, 3, 2, wData, '#f0d85e', 'W (3×2)',
+    ['v₁', 'v₂'], [0, 1]);
+
+  // Feature labels on left
+  ctx.save();
+  ctx.font = '500 10px IBM Plex Mono';
+  ctx.fillStyle = '#6b7194';
+  ctx.textAlign = 'right';
+  featureNames.forEach((f, i) => {
+    ctx.fillText(f, 24, 55 + 14 + i * cellH + cellH/2 + 1);
+  });
+  ctx.restore();
+
+  // "Descartado" label
+  ctx.save();
+  ctx.font = '500 9px IBM Plex Mono';
+  ctx.fillStyle = '#f06b6b80';
+  ctx.textAlign = 'center';
+  const x3 = 30 + 2 * cellW + cellW / 2;
+  ctx.fillText('✕ descartado', x3, 55 + 14 + 3 * cellH + 16);
+  ctx.restore();
+}
+
+// ============================================
+//  CANVAS: Final scatter plot
+// ============================================
+function drawFinal() {
+  const { ctx, w, h } = setupC('cFinal');
+
+  // Generate more projected data (simulate 3 classes of wine)
+  const allPoints = [];
+  const rng = (s) => { let x=s; return()=>{x=(x*16807)%2147483647;return(x-1)/2147483646;}; };
+  const r = rng(123);
+
+  // Class 1 — clustered around (-2, 0.5)
+  for (let i = 0; i < 50; i++) {
+    const u1=r(),u2=r();
+    const z0=Math.sqrt(-2*Math.log(u1))*Math.cos(6.283*u2);
+    const z1=Math.sqrt(-2*Math.log(u1))*Math.sin(6.283*u2);
+    allPoints.push({ x: -2 + z0*0.7, y: 0.3 + z1*0.6, cls: 0 });
+  }
+  // Class 2 — around (0.5, -0.5)
+  for (let i = 0; i < 55; i++) {
+    const u1=r(),u2=r();
+    const z0=Math.sqrt(-2*Math.log(u1))*Math.cos(6.283*u2);
+    const z1=Math.sqrt(-2*Math.log(u1))*Math.sin(6.283*u2);
+    allPoints.push({ x: 0.5 + z0*0.9, y: -0.5 + z1*0.8, cls: 1 });
+  }
+  // Class 3 — around (2.5, 1)
+  for (let i = 0; i < 48; i++) {
+    const u1=r(),u2=r();
+    const z0=Math.sqrt(-2*Math.log(u1))*Math.cos(6.283*u2);
+    const z1=Math.sqrt(-2*Math.log(u1))*Math.sin(6.283*u2);
+    allPoints.push({ x: 2.5 + z0*0.8, y: 0.8 + z1*0.7, cls: 2 });
+  }
+
+  const cx = w/2, cy = h/2;
+  const scale = 55;
+  const colors = ['#f47b3e', '#3dd9c4', '#a67bf5'];
+  const classNames = ['Clase 1', 'Clase 2', 'Clase 3'];
+
+  // Grid
+  ctx.strokeStyle = '#1a1d28';
+  ctx.lineWidth = 1;
+  for (let i = -10; i <= 10; i++) {
+    ctx.beginPath(); ctx.moveTo(cx+i*scale,0); ctx.lineTo(cx+i*scale,h); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0,cy+i*scale); ctx.lineTo(w,cy+i*scale); ctx.stroke();
+  }
+
+  // Axes
+  ctx.strokeStyle = '#2a2e38';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(0,cy); ctx.lineTo(w,cy); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx,0); ctx.lineTo(cx,h); ctx.stroke();
+
+  ctx.save();
+  ctx.font = '600 12px IBM Plex Mono';
+  ctx.fillStyle = '#f47b3e';
+  ctx.textAlign = 'center';
+  ctx.fillText('PC1', w - 30, cy - 10);
+  ctx.fillText('PC2', cx + 25, 18);
+  ctx.restore();
+
+  // Points
+  allPoints.forEach(p => {
+    const px = cx + p.x * scale;
+    const py = cy - p.y * scale;
+    ctx.beginPath();
+    ctx.arc(px, py, 4, 0, Math.PI*2);
+    ctx.fillStyle = colors[p.cls] + 'aa';
+    ctx.fill();
+    ctx.strokeStyle = colors[p.cls];
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  });
+
+  // Legend
+  ctx.save();
+  classNames.forEach((name, i) => {
+    const lx = 20, ly = 22 + i * 22;
+    ctx.beginPath();
+    ctx.arc(lx, ly, 5, 0, Math.PI*2);
+    ctx.fillStyle = colors[i];
+    ctx.fill();
+    ctx.font = '500 11px IBM Plex Mono';
+    ctx.fillStyle = colors[i];
+    ctx.textAlign = 'left';
+    ctx.fillText(name, lx + 12, ly + 4);
+  });
+  ctx.restore();
+
+  // Title
+  ctx.save();
+  ctx.font = '600 13px IBM Plex Mono';
+  ctx.fillStyle = '#f0d85e';
+  ctx.textAlign = 'center';
+  ctx.fillText("X' = X_std · W  →  Wine en 2D", cx, h - 10);
+  ctx.restore();
+}
+
+</script>
+</body>
+</html>
