@@ -29,3 +29,9 @@ Thumbs.db
 *.csv
 *.dat
 !data/*.csv
+
+cursor/
+.cursor/
+
+claude
+.claude/
